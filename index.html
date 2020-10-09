@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+
+<body>
+  <div id="app">
+
+    <v-app>
+      <v-main>
+        <v-card class="mx-auto mt-5" max-width="auto"></v-card>
+
+        <v-row>
+          <v-col lg="9">
+            <template>
+              <v-btn-toggle color="blue lighten-2">
+                <v-btn v-for="(id,type,value) in typeId" :key="type.id" @click="taskFilter(id.id)" :value="id.id" small>
+                  {{ id.type }}
+                </v-btn>
+              </v-btn-toggle>
+            </template>
+          </v-col>
+
+          <v-col lg="3">
+            <template>
+              <v-chip class="ma-2" small>
+                {{ getValue }} {{ all }}
+              </v-chip>
+              <v-chip class="ma-2" color="green" text-color="white" small>
+                {{ green }}
+              </v-chip>
+              <v-chip class="ma-2" color="red" text-color="white" small>
+                {{ red }}
+              </v-chip>
+              <v-chip class="ma-2" color="orange" small>
+                {{ orange }}
+              </v-chip>
+            </template>
+          </v-col>
+        </v-row>
+
+        <v-data-table :headers="columns" :items="taskList" class="elevation-19">
+          <template v-slot:item.type_id="{item}">{{ getName(item.type_id) }}</template>
+          <template v-slot:item.require_date="{item}">
+            <v-chip label :color="getColor(item.status_id)">{{ item.require_date }} </v-chip>
+          </template>
+          <template v-slot:top>
+            <v-toolbar-title>Задачи на исполнение</v-toolbar-title>
+          </template>
+          </template>
+        </v-data-table>
+        </v-card>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: {
+        selectedTypeId: 0,
+        columns: [
+          { text: 'Срок', value: 'require_date', },
+          { text: 'Исполнитель', value: 'executor' },
+          { text: 'Тип задачи', value: 'type_id' },
+          { text: 'Краткое содержание', value: 'description' },
+          { text: 'Дата создания задачи', value: 'date_create' },
+        ],
+        taskList: [
+          {
+            "require_date": "2018-01-16",
+            "executor": "Иванов И.И.",
+            "type_id": 1,
+            "status_id": 1,
+            "description": "Проверсти проверку №1 Тест",
+            "date_create": "2018-01-02"
+          },
+          {
+            "require_date": "2018-02-12",
+            "executor": "Петров И.И.",
+            "type_id": 1,
+            "status_id": 1,
+            "description": "Проверсти проверку №2 Тест",
+            "date_create": "2018-01-02"
+          },
+          {
+            "require_date": "2018-07-22",
+            "executor": "Ромашкин Б.И.",
+            "type_id": 2,
+            "status_id": 2,
+            "description": "Контроль предписания №1 Тестовое предписание",
+            "date_create": "2018-05-12"
+          },
+          {
+            "require_date": "2018-05-13",
+            "executor": "Цветков В.И.",
+            "type_id": 3,
+            "status_id": 2,
+            "description": "Личное поручение",
+            "date_create": "2018-02-02"
+          },
+          {
+            "require_date": "2018-04-20",
+            "executor": "Агапов В.И.",
+            "type_id": 2,
+            "status_id": 3,
+            "description": "Контроль предписания №2",
+            "date_create": "2018-03-12"
+          }
+        ],
+        typeId: [
+          { id: 0, type: 'Все задачи' },
+          { id: 1, type: 'Провести проверку' },
+          { id: 2, type: 'Контроль предписания' },
+          { id: 3, type: 'Поручение' }
+        ],
+        list: 0,
+
+        all: 0,
+        green: 0,
+        red: 0,
+        orange: 0,
+
+      },
+      methods: {
+        taskFilter(id) {
+          if (this.list == 0) {
+            this.list = this.taskList
+          } else {
+            this.taskList = this.list
+          }
+          this.selectedTypeId = id;
+          if (id == 0) {
+            this.taskList = this.list
+          } else {
+            this.taskList = this.taskList.filter((value) => {
+              return value.type_id == this.selectedTypeId;
+            })
+          }
+        },
+        getName(id) {
+          if (id == 1) {
+            return 'Провести проверку'
+          } else if (id == 2) {
+            return 'Контроль предписания'
+          } else {
+            return 'Поручение'
+          }
+        },
+        getColor(id) {
+          if (id == 1) {
+            return 'green';
+          } else if (id == 2) {
+            return 'orange'
+          } else {
+            return 'red';
+          }
+        }
+      },
+      computed: {
+        getValue() {
+          this.all = 0
+          this.green = 0
+          this.red = 0
+          this.orange = 0
+          this.taskList.filter((value) => {
+            this.all++
+            if (value.status_id == 1) {
+              this.green++
+            } else if (value.status_id == 2) {
+              this.orange++
+            } else {
+              this.red++
+            }
+          })
+        },
+      }
+    }) 
+  </script>
+</body>
+
+</html>
